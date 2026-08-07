@@ -3,10 +3,12 @@ package com.techpalle.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import com.techpalle.config.JwtProperties;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -16,20 +18,18 @@ import java.util.List;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+	private final JwtProperties jwtProperties;
+	
+	private SecretKey getSigningKey() {
 
-    @Value("${jwt.access-token-expiration}")
-    private long accessTokenExpiration;
-
-    @Value("${jwt.refresh-token-expiration}")
-    private long refreshTokenExpiration;
-
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor( jwtSecret.getBytes(StandardCharsets.UTF_8));
-    }
+	return Keys.hmacShaKeyFor(
+	jwtProperties.getSecret()
+	.getBytes(StandardCharsets.UTF_8)
+	);
+	}
 
     public String generateAccessToken(UserDetails userDetails) {
 
@@ -41,7 +41,7 @@ public class JwtService {
         return Jwts.builder() .subject(userDetails.getUsername())
                 .claim("authorities", authorities)
                 .issuedAt(new Date())
-                .expiration( new Date(System.currentTimeMillis() + accessTokenExpiration) )
+                .expiration( new Date(System.currentTimeMillis() + jwtProperties.getAccessTokenExpiration()) )
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -51,7 +51,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date())
-                .expiration( new Date(System.currentTimeMillis() + refreshTokenExpiration ))
+                .expiration( new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpiration() ))
                 .signWith(getSigningKey())
                 .compact();
     }
