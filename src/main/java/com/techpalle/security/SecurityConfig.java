@@ -28,9 +28,9 @@ public class SecurityConfig {
         		SessionCreationPolicy.STATELESS)).exceptionHandling(exception ->
         		exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-                .authorizeHttpRequests(auth -> auth .requestMatchers( "/api/auth/register","/api/auth/logout",
+                .authorizeHttpRequests(auth -> auth .requestMatchers( "/api/auth/register","/api/auth/login","/api/auth/logout",
                                 "/api/auth/refresh", "/api/auth/forgot-password", "/api/auth/verify-otp",
-                                "/api/auth/reset-password", "/swagger-ui/**","/swagger-ui.html",
+                                "/api/auth/reset-password", "/swagger-ui/**","/swagger-ui/index.html",
                                 "/v3/api-docs/**")
                 .permitAll().anyRequest().authenticated() ).addFilterBefore(jwtAuthenticationFilter,
                         		UsernamePasswordAuthenticationFilter.class );return http.build();

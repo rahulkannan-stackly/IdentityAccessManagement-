@@ -3,14 +3,18 @@ package com.techpalle.service;
 import com.techpalle.dto.auth.ForgotPasswordRequest;
 import com.techpalle.dto.auth.LoginRequest;
 import com.techpalle.dto.auth.LoginResponse;
+import com.techpalle.dto.auth.OtpResponse;
 import com.techpalle.dto.auth.RefreshTokenRequest;
 import com.techpalle.dto.auth.RegisterRequest;
 import com.techpalle.dto.auth.ResetPasswordRequest;
+import com.techpalle.dto.auth.ResetPasswordResponse;
 import com.techpalle.dto.auth.VerifyOtpRequest;
+import com.techpalle.dto.auth.VerifyOtpResponse;
+import com.techpalle.dto.user.UserResponse;
 
 public interface AuthService {
 
-    void register(RegisterRequest request);
+	UserResponse register(RegisterRequest request);
 
     LoginResponse login(LoginRequest request);
 
@@ -18,9 +22,11 @@ public interface AuthService {
 
     LoginResponse refreshToken( RefreshTokenRequest request);
 
-    void forgotPassword(ForgotPasswordRequest request);
+    OtpResponse forgotPassword(ForgotPasswordRequest request);
 
-    void verifyOtp( VerifyOtpRequest request);
+    VerifyOtpResponse verifyOtp( VerifyOtpRequest request);
 
-    void resetPassword( ResetPasswordRequest request);
+    ResetPasswordResponse resetPassword( ResetPasswordRequest request);
+    
+   
 }

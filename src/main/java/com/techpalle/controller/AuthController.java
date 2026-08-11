@@ -3,11 +3,15 @@ package com.techpalle.controller;
 import com.techpalle.dto.auth.ForgotPasswordRequest;
 import com.techpalle.dto.auth.LoginRequest;
 import com.techpalle.dto.auth.LoginResponse;
+import com.techpalle.dto.auth.OtpResponse;
 import com.techpalle.dto.auth.RefreshTokenRequest;
 import com.techpalle.dto.auth.RegisterRequest;
 import com.techpalle.dto.auth.ResetPasswordRequest;
+import com.techpalle.dto.auth.ResetPasswordResponse;
 import com.techpalle.dto.auth.VerifyOtpRequest;
+import com.techpalle.dto.auth.VerifyOtpResponse;
 import com.techpalle.dto.common.ApiResponse;
+import com.techpalle.dto.user.UserResponse;
 import com.techpalle.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,7 +35,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register new user")
-    public ResponseEntity<ApiResponse<Void>> register(
+    public ResponseEntity<ApiResponse<UserResponse>> register(
             @Valid @RequestBody RegisterRequest request) {
 
         log.info(
@@ -39,13 +43,13 @@ public class AuthController {
                 request.getUsername()
         );
 
-        authService.register(request);
-
+        UserResponse response =
+        		authService.register(request);
         return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
+                ApiResponse.<UserResponse>builder()
                         .success(true)
                         .message("User registered successfully")
-                        .data(null)
+                        .data(response)
                         .build()
         );
     }
@@ -111,7 +115,7 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     @Operation(summary = "Generate OTP for password reset")
-    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+    public ResponseEntity<ApiResponse<OtpResponse>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
 
         log.info(
@@ -119,20 +123,21 @@ public class AuthController {
                 request.getEmail()
         );
 
-        authService.forgotPassword(request);
+        OtpResponse response =
+        		authService.forgotPassword(request);
 
         return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
+                ApiResponse.<OtpResponse>builder()
                         .success(true)
                         .message("OTP generated successfully")
-                        .data(null)
+                        .data(response)
                         .build()
         );
     }
 
     @PostMapping("/verify-otp")
     @Operation(summary = "Verify OTP")
-    public ResponseEntity<ApiResponse<Void>> verifyOtp(
+    public ResponseEntity<ApiResponse<VerifyOtpResponse>> verifyOtp(
             @Valid @RequestBody VerifyOtpRequest request) {
 
         log.info(
@@ -140,20 +145,21 @@ public class AuthController {
                 request.getEmail()
         );
 
-        authService.verifyOtp(request);
+        VerifyOtpResponse response =
+        		authService.verifyOtp(request);
 
         return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
+                ApiResponse.<VerifyOtpResponse>builder()
                         .success(true)
                         .message("OTP verified successfully")
-                        .data(null)
+                        .data(response)
                         .build()
         );
     }
 
     @PostMapping("/reset-password")
     @Operation(summary = "Reset user password")
-    public ResponseEntity<ApiResponse<Void>> resetPassword(
+    public ResponseEntity<ApiResponse<ResetPasswordResponse>> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
 
         log.info(
@@ -161,13 +167,14 @@ public class AuthController {
                 request.getEmail()
         );
 
-        authService.resetPassword(request);
+        ResetPasswordResponse response =
+        		authService.resetPassword(request);
 
         return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
+                ApiResponse.<ResetPasswordResponse>builder()
                         .success(true)
                         .message("Password reset successfully")
-                        .data(null)
+                        .data(response)
                         .build()
         );
     }

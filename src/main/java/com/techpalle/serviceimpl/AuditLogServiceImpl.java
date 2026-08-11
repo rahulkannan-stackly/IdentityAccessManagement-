@@ -25,7 +25,8 @@ public class AuditLogServiceImpl implements AuditLogService {
         		.status(status).user(user).build();
 
         auditLogRepository.save(auditLog);
-
+       
         log.info( "Audit log saved successfully - Action: {}, EntityId: {}",actionType,entityId);
     }
+    
 }

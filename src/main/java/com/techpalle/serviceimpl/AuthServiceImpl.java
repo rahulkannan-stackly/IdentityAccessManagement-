@@ -3,16 +3,20 @@ package com.techpalle.serviceimpl;
 import com.techpalle.dto.auth.ForgotPasswordRequest;
 import com.techpalle.dto.auth.LoginRequest;
 import com.techpalle.dto.auth.LoginResponse;
+import com.techpalle.dto.auth.OtpResponse;
 import com.techpalle.dto.auth.RefreshTokenRequest;
 import com.techpalle.dto.auth.RegisterRequest;
 import com.techpalle.dto.auth.ResetPasswordRequest;
+import com.techpalle.dto.auth.ResetPasswordResponse;
 import com.techpalle.dto.auth.VerifyOtpRequest;
+import com.techpalle.dto.auth.VerifyOtpResponse;
+import com.techpalle.dto.user.UserResponse;
 import com.techpalle.entity.OTP;
 import com.techpalle.entity.RefreshToken;
 import com.techpalle.entity.User;
-import com.techpalle.exception.DuplicateResourceException;
 import com.techpalle.exception.ResourceNotFoundException;
 import com.techpalle.mapper.AuthMapper;
+import com.techpalle.mapper.UserMapper;
 import com.techpalle.repository.UserRepository;
 import com.techpalle.security.CustomUserDetailsService;
 import com.techpalle.security.JwtService;
@@ -40,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
-
+    private final UserMapper userMapper;
     private final AuthMapper authMapper;
     private final OTPService otpService;
     private final RefreshTokenService refreshTokenService;
@@ -48,33 +52,12 @@ public class AuthServiceImpl implements AuthService {
     private final AuditLogService auditLogService;
 
     @Override
-    public void register(RegisterRequest request) {
-
-        log.info(
-                "Processing registration request for username: {}",
-                request.getUsername()
-        );
-
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new DuplicateResourceException(
-                    "Username already exists"
-            );
-        }
-
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException(
-                    "Email already exists"
-            );
-        }
+    public UserResponse register(RegisterRequest request) {
 
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(
-                        passwordEncoder.encode(
-                                request.getPassword()
-                        )
-                )
+                .password(passwordEncoder.encode(request.getPassword()))
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
@@ -83,18 +66,7 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
-        auditLogService.saveAuditLog(
-                "REGISTER",
-                "USER",
-                savedUser.getId(),
-                "SUCCESS",
-                savedUser
-        );
-
-        log.info(
-                "User registered successfully with id: {}",
-                savedUser.getId()
-        );
+        return userMapper.toResponse(savedUser);
     }
 
     @Override
@@ -227,7 +199,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void forgotPassword(
+    public OtpResponse forgotPassword(
             ForgotPasswordRequest request) {
 
         log.info(
@@ -242,7 +214,7 @@ public class AuthServiceImpl implements AuthService {
                                 "User not found"
                         ));
 
-        otpService.generateOtp(user);
+        OTP otp = otpService.generateOtp(user);
 
         auditLogService.saveAuditLog(
                 "FORGOT_PASSWORD",
@@ -256,10 +228,13 @@ public class AuthServiceImpl implements AuthService {
                 "OTP generated successfully for email: {}",
                 request.getEmail()
         );
+        return OtpResponse.builder()
+        		.otp(otp.getCode())
+        		.build();
     }
 
     @Override
-    public void verifyOtp(
+    public VerifyOtpResponse verifyOtp(
             VerifyOtpRequest request) {
 
         log.info(
@@ -283,10 +258,16 @@ public class AuthServiceImpl implements AuthService {
                 "OTP verified successfully for email: {}",
                 request.getEmail()
         );
+
+        return VerifyOtpResponse.builder()
+                .email(user.getEmail())
+                .verified(true)
+                .message("OTP verified successfully")
+                .build();
     }
 
     @Override
-    public void resetPassword(
+    public ResetPasswordResponse resetPassword(
             ResetPasswordRequest request) {
 
         log.info(
@@ -328,5 +309,11 @@ public class AuthServiceImpl implements AuthService {
                 "Password reset completed successfully for user: {}",
                 user.getUsername()
         );
+
+        return ResetPasswordResponse.builder()
+                .email(user.getEmail())
+                .passwordReset(true)
+                .message("Password reset successfully")
+                .build();
     }
 }
